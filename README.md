@@ -24,7 +24,11 @@ git clone https://github.com/t0-n1/ServerlessDomCat.git
 cd ServerlessDomCat
 
 sudo docker build -t serverlessdomcat .
+```
 
+## Execution
+
+```bash
 xhost +local:docker
 IPQS='Your IPQS API Key'
 SHODAN='Your Shodan API Key'
