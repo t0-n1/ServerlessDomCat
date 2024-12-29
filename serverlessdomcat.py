@@ -28,6 +28,7 @@ def save(results):
                     <td><a href="https://{e[1]["hostname"]}">{e[1]["hostname"]}</a></td>
                     <td>{e[1]["ip_score"]}</td>
                     <td>{e[1]["url_score"]}</td>
+                    <td>{e[1]["category"]}</td>
                     <td><a href="https://{e[0]}"><img src="data:image/png;base64,{e[1]["screenshot"]}" width="50%" height="50%"/></a></td>
                 </tr>'''
         html = html.replace(comment, row + '\n' + '\t'*4 + comment)
