@@ -12,6 +12,17 @@ api_key = {
     'shodan': getenv('SHODAN')
 }
 
+provider = {
+    'cloudflare': {
+        'url': 'https://radar.cloudflare.com/domains/domain/',
+        'xpath': '//*[@id="root"]/main/div[2]/article[1]/section[1]/figure/div[1]/ul/li/span/span'
+    },
+    'norton': {
+        'url': 'https://safeweb.norton.com/report?url=',
+        'xpath': '//html/body/app-root/div/div/app-report-page/div/app-report-detail/div/app-current-category/div/div/p/span'
+    }
+}
+
 
 def save(results):
 
@@ -37,6 +48,31 @@ def save(results):
     open(f'{fpath}.html', 'w').write(html)
 
 
+def get_category(provider_name, domain):
+
+    category = ''
+
+    try:
+        with sync_playwright() as playwright:
+
+            browser = playwright.firefox.launch(headless = True)
+            context = browser.new_context(ignore_https_errors = True)
+
+            url = f'{provider[provider_name]["url"]}{domain}'
+
+            page = context.new_page()
+            page.goto(url)
+
+            category = page.locator(provider[provider_name]['xpath']).nth(0).inner_text()
+
+            browser.close()
+
+    except Exception as e:
+        print(f'get_category() Error: {e}')
+ 
+    return category
+
+
 def visit(url, screenshot = False):
     try:
         with sync_playwright() as playwright:
@@ -54,7 +90,6 @@ def visit(url, screenshot = False):
             else:
                 input('Press any key to continue...')
                 browser.close()
-
 
     except Exception as e:
         print(f'visit() Error: {e}')
@@ -146,6 +181,11 @@ def main():
                 print(f'IP score = {candidate["ip_score"]}')
 
                 candidate['url_score'], candidate['unsafe'], candidate['category'] = get_url_score(candidate['hostname'])
+
+                for p in provider:
+                    category = get_category(p, candidate['hostname'])
+                    if category:
+                        candidate['category'] += f', {category}'
 
                 print(f'URL score: {candidate["url_score"]}')
                 print(f'Safe: {not candidate["unsafe"]}')
